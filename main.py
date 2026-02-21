@@ -3,9 +3,8 @@ from discord.ext import commands
 from datetime import datetime
 import os
 
-# 봇의 권한을 최대로 설정합니다.
+# 모든 권한을 다 켭니다.
 intents = discord.Intents.all()
-intents.message_content = True
 intents.members = True
 
 bot = commands.Bot(command_prefix='!', intents=intents)
@@ -18,13 +17,8 @@ async def on_ready():
 
 @bot.event
 async def on_member_join(member):
-    # 채널 이름을 찾습니다.
-    target_name = '👋ㆍ신규멤버'
-    channel = discord.utils.get(member.guild.text_channels, name=target_name)
-    
-    # 만약 위 이름으로 못 찾으면, 이름에 '신규멤버'라는 글자가 포함된 채널을 찾습니다.
-    if not channel:
-        channel = next((c for c in member.guild.text_channels if '신규멤버' in c.name), None)
+    # '신규멤버' 라는 글자가 들어간 모든 채널을 다 뒤져서 찾습니다.
+    channel = next((c for c in member.guild.text_channels if '신규멤버' in c.name), None)
     
     if channel:
         now = datetime.now().strftime('%Y년 %m월 %d일 %H시 %M분')
@@ -46,7 +40,10 @@ async def on_member_join(member):
         embed.set_footer(text=f"💜도파민💜 서버의 소중한 멤버가 되어주셔서 감사합니다!\n유저 ID: {member.id}")
 
         await channel.send(embed=embed)
-        print(f"[{member.display_name}]님 환영 메시지 전송 완료")
+        print(f"[{member.display_name}]님 전송 완료")
+    else:
+        # 채널을 못 찾았을 때 로그에 찍히게 합니다.
+        print("에러: '신규멤버'라는 이름이 포함된 채널을 찾을 수 없습니다.")
 
 token = os.environ.get('DISCORD_TOKEN')
 bot.run(token)
