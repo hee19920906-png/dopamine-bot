@@ -1,9 +1,10 @@
 import discord
 from discord.ext import commands
 from datetime import datetime
-import os  # 서버 환경 설정을 읽어오기 위해 필요합니다.
+import os
 
-intents = discord.Intents.default()
+# 봇의 권한을 최대로 설정합니다.
+intents = discord.Intents.all()
 intents.message_content = True
 intents.members = True
 
@@ -17,8 +18,13 @@ async def on_ready():
 
 @bot.event
 async def on_member_join(member):
+    # 채널 이름을 찾습니다.
     target_name = '👋ㆍ신규멤버'
     channel = discord.utils.get(member.guild.text_channels, name=target_name)
+    
+    # 만약 위 이름으로 못 찾으면, 이름에 '신규멤버'라는 글자가 포함된 채널을 찾습니다.
+    if not channel:
+        channel = next((c for c in member.guild.text_channels if '신규멤버' in c.name), None)
     
     if channel:
         now = datetime.now().strftime('%Y년 %m월 %d일 %H시 %M분')
@@ -40,8 +46,7 @@ async def on_member_join(member):
         embed.set_footer(text=f"💜도파민💜 서버의 소중한 멤버가 되어주셔서 감사합니다!\n유저 ID: {member.id}")
 
         await channel.send(embed=embed)
-        print(f"[{member.display_name}]님 전송 완료")
+        print(f"[{member.display_name}]님 환영 메시지 전송 완료")
 
-# [중요] 토큰을 코드에 직접 적지 않고, Render 서버에 저장된 값을 불러옵니다.
 token = os.environ.get('DISCORD_TOKEN')
 bot.run(token)
